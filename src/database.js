@@ -2,21 +2,23 @@ const { MongoMemoryServer } = require("mongodb-memory-server");
 const { MongoClient } = require("mongodb");
 const data = require("./data");
 
+const mongoServer = new MongoMemoryServer();
+
+let client = null;
 let database = null;
-let mongo = null;
 
 async function startDatabase() {
-  if (!mongo) {
-    mongo = await MongoMemoryServer.create();
+  if (!client) {
+    await mongoServer.start();
+
+    client = new MongoClient(mongoServer.getUri());
   }
 
-  const connection = await MongoClient.connect(mongo.getUri(), {
-    useNewUrlParser: true,
-  });
+  await client.connect();
 
   //Seed Database
   if (!database) {
-    database = connection.db();
+    database = client.db();
     await database.collection("users").insertMany(data.Users);
     await database.collection("posts").insertMany(data.Posts);
   }
@@ -25,7 +27,8 @@ async function startDatabase() {
 }
 
 async function stopDatabase() {
-  await mongo.stop();
+  await client.close();
+  await mongoServer.stop();
 }
 
 module.exports = {

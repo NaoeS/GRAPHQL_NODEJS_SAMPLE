@@ -2,6 +2,6 @@ const app = require("./server");
 
 const port = process.env.PORT || "4200";
 
-app.listen(port);
-
-console.log(`🚀 Server ready at http://localhost:${port}/graphql`);
+app.listen(port, () => {
+  console.log(`🚀 Server ready at http://localhost:${port}/playground`);
+});
